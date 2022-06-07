@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController // To make this class visible to our servlet container
@@ -30,19 +31,42 @@ public class EmployeeController {
     public Employee addEmployee(@RequestBody Employee employee) {
 
         employee.setId(count++);
-        employeeMap.put(employee.getId(), employee);
+        employeeMap.putIfAbsent(employee.getId(), employee);
         return employee;
     }
 
     @GetMapping("employee/get")
     public Employee getEmployee(@RequestParam("id") int id) {
-        return employeeMap.get(id);
+        return Optional.ofNullable(employeeMap.get(id)).orElse(new Employee());
     }
 
     @GetMapping("employee/get/all")
     public List<Employee> getAllEmployees(){
         return employeeMap.values().stream().collect(Collectors.toList());
     }
+
+    @PutMapping("employee/update")
+    public Employee updateEmployee(@RequestBody Employee employee) throws Exception {
+
+
+        if (employee.getId() == null) {
+            throw new Exception("ID is not present for the employee to be updated");
+        }
+
+        if (!employeeMap.containsKey(employee.getId())) {
+            throw new Exception("Employee does not exist");
+        }
+
+        employeeMap.put(employee.getId(), employee);
+        return employee;
+
+    }
+
+    @DeleteMapping("employee/delete")
+    public Employee deleteEmployee(@PathVariable("id") int id) {
+        return  employeeMap.remove(id);
+    }
+
 
 
 }
