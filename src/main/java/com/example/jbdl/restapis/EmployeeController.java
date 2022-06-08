@@ -2,10 +2,12 @@ package com.example.jbdl.restapis;
 
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @RestController // To make this class visible to our servlet container
 public class EmployeeController {
@@ -18,6 +20,7 @@ public class EmployeeController {
      Schema:
      HashMap : {employee.id, employee}
 
+     We are implementing five endpoints:
      * Add an employee --> input: employee, output: void
      * Get details of a particular employee --> input: employee.id, output: employee
      * Get details of all employees --> input: void, output: List<employee>
@@ -28,7 +31,7 @@ public class EmployeeController {
     // conversion from java to json and vice versa is done by some spring web utility
 
     @PostMapping("/employee/add")
-    public Employee addEmployee(@RequestBody Employee employee) {
+    public Employee addEmployee(@Valid @RequestBody Employee employee) {
 
         employee.setId(count++);
         employeeMap.putIfAbsent(employee.getId(), employee);
@@ -67,6 +70,11 @@ public class EmployeeController {
         return  employeeMap.remove(id);
     }
 
-
+    @GetMapping("/dummy")
+    public List<Integer> getListOfNumbers(@RequestParam(value = "start", required = false, defaultValue = "0") int start, @RequestParam("end") int end) {
+        return IntStream.range(start, end + 1)
+                .boxed()
+                .collect(Collectors.toList());
+    }
 
 }
